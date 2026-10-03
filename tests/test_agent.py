@@ -62,6 +62,37 @@ class AgentTests(unittest.TestCase):
             self.assertEqual(result['tier_discount_pct'], 10)
             self.assertEqual(result['remaining_points'], 4250)
 
+    def test_incomplete_sandbox_result_uses_labeled_fallback(self):
+        interpreter = MagicMock()
+        interpreter.invoke.return_value = {'stream': iter([{'result': {'content': [
+            {'type': 'text', 'text': '{"final_total": "0.00"}'}]}}])}
+        with patch.object(agent, 'code_session') as session, self.assertLogs(agent.logger, level='ERROR'):
+            session.return_value.__enter__.return_value = interpreter
+            result = json.loads(agent.calculate_loyalty_discount(4250, 'Gold', 150))
+        self.assertEqual(result['calculation_source'], 'tier_only_fallback')
+        self.assertEqual(result['final_total'], '135.00')
+        self.assertEqual(result['tier_discount_pct'], 10)
+        self.assertEqual(result['remaining_points'], 4250)
+
+    def test_display_and_memory_preserve_calculator_result(self):
+        client = MagicMock()
+        client.get_memory_strategies.return_value = []
+        hook = agent.MemoryHook('CUST-123', 'test', client, 'mem')
+        data = self.calculate(4250, 'Gold', 150)
+        messages = [
+            {'role': 'user', 'content': [{'text': 'Calculate my discount'}]},
+            {'role': 'assistant', 'content': [{'toolUse': {'toolUseId': 'calc', 'name': 'calculate_loyalty_discount'}}]},
+            {'role': 'user', 'content': [{'toolResult': {'toolUseId': 'calc', 'status': 'success', 'content': [{'text': json.dumps(data)}]}}]},
+            {'role': 'assistant', 'content': [{'text': 'Incorrect total: $95.00'}]}]
+        hook.save_support_interaction(SimpleNamespace(agent=SimpleNamespace(messages=messages)))
+        displayed = agent.plain_text(messages[-1])
+        self.assertIn('Final total: $99.00', displayed)
+        self.assertNotIn('$95.00', displayed)
+        self.assertEqual(client.create_event.call_args.kwargs['messages'][1], (displayed, 'ASSISTANT'))
+        messages += [{'role': 'user', 'content': [{'text': 'Hello'}]}, {'role': 'assistant', 'content': [{'text': 'Hi'}]}]
+        agent.ground_calculation_response(messages)
+        self.assertEqual(agent.plain_text(messages[-1]), 'Hi')
+
     def test_namespace_compatibility(self):
         client = MagicMock()
         client.get_memory_strategies.return_value = [

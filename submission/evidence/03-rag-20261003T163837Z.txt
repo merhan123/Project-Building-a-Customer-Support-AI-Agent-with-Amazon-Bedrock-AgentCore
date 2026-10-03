@@ -1,0 +1,26 @@
+UTC: 20261003T163837Z
+Runtime session: aeae5e24-79f1-499e-bae3-3dd14a5d53ad
+Command: agentcore invoke '{"prompt": "What are the benefits of the Platinum loyalty tier?", "customer_id": "CUST-123", "session_id": "t3-9caa7dda", "include_tool_trace": true}' --session-id aeae5e24-79f1-499e-bae3-3dd14a5d53ad
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: aeae5e24-79f1-499e-bae3-3dd14a5d53ad                                                                                                                │
+│ Request ID: 2dfbf015-6b2a-4104-bf77-0511d289fec5                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+As a Platinum loyalty member, you receive these benefits:
+
+- **Free same-day shipping** on eligible orders
+- **15% discount** on purchases
+- **Priority customer support** access
+
+These benefits apply whenever you shop with us. Your current Gold status (4,250 points) is close to qualifying for Platinum - you need just 750 more points to 
+reach the 5,000-point threshold.
+
+STDERR:

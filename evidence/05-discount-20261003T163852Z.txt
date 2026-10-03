@@ -1,12 +1,12 @@
-UTC: 20261003T162708Z
-Runtime session: 3bb2f829-cb7b-4b57-9c85-f20c7a18b290
-Command: agentcore invoke '{"prompt": "Can you track order ORD-001?", "customer_id": "CUST-123", "session_id": "t1"}' --session-id 3bb2f829-cb7b-4b57-9c85-f20c7a18b290
+UTC: 20261003T163852Z
+Runtime session: 6da402bc-e1bf-4376-b265-e330d8e670f4
+Command: agentcore invoke '{"prompt": "I am a Gold member with 4250 points. Calculate my discount on a $150 standard order.", "customer_id": "CUST-123", "session_id": "t5-beacb6a9", "include_tool_trace": true}' --session-id 6da402bc-e1bf-4376-b265-e330d8e670f4
 Exit code: 0
 
 STDOUT:
 ╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
-│ Session: 3bb2f829-cb7b-4b57-9c85-f20c7a18b290                                                                                                                │
-│ Request ID: a95e68a6-cfaa-4ad1-a0ae-c4464645f4aa                                                                                                             │
+│ Session: 6da402bc-e1bf-4376-b265-e330d8e670f4                                                                                                                │
+│ Request ID: 621d77b0-9303-43b7-959c-4955e307109a                                                                                                             │
 │ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
 │ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
 │       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
@@ -14,15 +14,19 @@ STDOUT:
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 Response:
-Your order **ORD-001** is currently **SHIPPED**.
+### Gold Loyalty Discount Calculation for $150 Standard Order
 
-**Order Details:**
-- **Items:** Wireless Headphones Pro (1 x $89.99)
-- **Total:** $89.99
-- **Carrier:** UPS
-- **Tracking Number:** TRK987654321
-- **Estimated Delivery:** October 5, 2026
+**Breakdown:**
+- **Points Redeemed:** 4,000 points → $40.00 discount  
+- **Gold Tier Discount:** 10% of $150 = $15.00 → Applied as $11.00 after points discount  
+- **Final Total After Discounts:** $99.00  
+- **Total Savings:** $51.00  
 
-You can track the shipment progress using the tracking number TRK987654321 with UPS.
+**Loyalty Points Update:**
+- **Points Earned from Purchase:** 99 points  
+- **Remaining Points After Redemption:** 250 points  
+- **New Points Balance:** 349 points  
+
+Your Gold membership provides substantial savings—enjoy your discounted order!
 
 STDERR:

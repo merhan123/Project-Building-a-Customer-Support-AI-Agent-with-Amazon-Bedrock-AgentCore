@@ -1,8 +1,10 @@
 test_caps_rounding_and_earning (test_agent.AgentTests.test_caps_rounding_and_earning) ... ok
 test_course_discount (test_agent.AgentTests.test_course_discount) ... ok
+test_display_and_memory_preserve_calculator_result (test_agent.AgentTests.test_display_and_memory_preserve_calculator_result) ... ok
+test_incomplete_sandbox_result_uses_labeled_fallback (test_agent.AgentTests.test_incomplete_sandbox_result_uses_labeled_fallback) ... ok
 test_invalid_inputs_and_labeled_fallback (test_agent.AgentTests.test_invalid_inputs_and_labeled_fallback) ... ERROR:CSAI_Agent:Code interpreter failed; returning a labeled tier-only estimate
 Traceback (most recent call last):
-  File "/Users/merhanadel/Desktop/Udacity/Project-Building-a-Customer-Support-AI-Agent-with-Amazon-Bedrock-AgentCore/starter/main.py", line 185, in calculate_loyalty_discount
+  File "/Users/merhanadel/Desktop/Udacity/Project-Building-a-Customer-Support-AI-Agent-with-Amazon-Bedrock-AgentCore/starter/main.py", line 219, in calculate_loyalty_discount
     with code_session(REGION) as interpreter:
          ~~~~~~~~~~~~^^^^^^^^
   File "/opt/homebrew/Cellar/python@3.13/3.13.11/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py", line 1169, in __call__
@@ -20,6 +22,6 @@ test_namespace_compatibility (test_agent.AgentTests.test_namespace_compatibility
 test_rag_empty_and_grounded_chunks (test_agent.AgentTests.test_rag_empty_and_grounded_chunks) ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 0.006s
+Ran 8 tests in 0.007s
 
 OK

@@ -1,0 +1,130 @@
+[
+  {
+    "name": "refund-processor",
+    "targetId": "OTO2C7MQJ4",
+    "status": "READY",
+    "targetConfiguration": {
+      "mcp": {
+        "lambda": {
+          "lambdaArn": "arn:aws:lambda:us-east-1:327887916689:function:refund-processor",
+          "toolSchema": {
+            "inlinePayload": [
+              {
+                "name": "initiate_refund",
+                "description": "Initiate a refund for a customer order.",
+                "inputSchema": {
+                  "type": "object",
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "description": "Reason for refund"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "description": "Refund amount in USD"
+                    },
+                    "order_id": {
+                      "type": "string",
+                      "description": "Order ID to refund"
+                    }
+                  },
+                  "required": [
+                    "order_id",
+                    "reason"
+                  ]
+                }
+              },
+              {
+                "name": "check_refund_status",
+                "description": "Check the status of an existing refund.",
+                "inputSchema": {
+                  "type": "object",
+                  "properties": {
+                    "refund_id": {
+                      "type": "string",
+                      "description": "Refund ID to check"
+                    }
+                  },
+                  "required": [
+                    "refund_id"
+                  ]
+                }
+              },
+              {
+                "name": "get_return_label",
+                "description": "Generate a prepaid return shipping label for an order.",
+                "inputSchema": {
+                  "type": "object",
+                  "properties": {
+                    "order_id": {
+                      "type": "string",
+                      "description": "Order ID needing a label"
+                    }
+                  },
+                  "required": [
+                    "order_id"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "order-tracker",
+    "targetId": "WR60LFT63V",
+    "status": "READY",
+    "targetConfiguration": {
+      "mcp": {
+        "apiGateway": {
+          "restApiId": "nyjjn1foad",
+          "stage": "prod",
+          "apiGatewayToolConfiguration": {
+            "toolOverrides": [
+              {
+                "name": "get_order",
+                "description": "get order",
+                "path": "/orders/{order_id}",
+                "method": "GET"
+              },
+              {
+                "name": "get_customer_orders",
+                "description": "get customer orders",
+                "path": "/customers/{customer_id}/orders",
+                "method": "GET"
+              },
+              {
+                "name": "get_customer",
+                "description": "get customer",
+                "path": "/customers/{customer_id}",
+                "method": "GET"
+              }
+            ],
+            "toolFilters": [
+              {
+                "filterPath": "/orders/{order_id}",
+                "methods": [
+                  "GET"
+                ]
+              },
+              {
+                "filterPath": "/customers/{customer_id}/orders",
+                "methods": [
+                  "GET"
+                ]
+              },
+              {
+                "filterPath": "/customers/{customer_id}",
+                "methods": [
+                  "GET"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+]

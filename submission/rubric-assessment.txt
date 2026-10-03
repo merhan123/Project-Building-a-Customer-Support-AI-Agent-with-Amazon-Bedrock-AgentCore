@@ -1,0 +1,70 @@
+Rubric assessment — implementation and evidence map
+
+Assessment: all seven required criteria are covered by code and live evidence.
+Eight local regression tests pass. Optional enhancements are listed separately.
+
+1. Cloud runtime deployment
+   Module-level BedrockAgentCoreApp; async invoke decorated with @app.entrypoint;
+   app.run() in __main__. All selected CLI transcripts include agentcore invoke,
+   runtime ARN, request ID, and successful responses.
+
+2. MCP external tools
+   MCPClient connects to the configured Gateway, loads tools, handles pagination,
+   and adds them to the Strands agent. The order/refund *-tool-trace.json conversation logs show
+   toolUse inputs and matching toolResult outputs. gateway-targets.json records
+   order-tracker as apiGateway and refund-processor as lambda.
+
+3. Retrieval Augmented Generation
+   @tool search_knowledge_base calls the Retrieve API, joins text chunks using
+   separators, guards missing KB_ID, and documents product/policy/loyalty use.
+   The RAG transcript shows the Platinum benefits response.
+
+4. Cross-session memory
+   get_namespaces handles namespaceTemplates and legacy namespaces. MemoryHook
+   extends HookProvider, registers retrieval and persistence callbacks, tags
+   retrieved facts by strategy and prepends Customer Context. Persistence saves
+   the original user message and final assistant text through create_event.
+   The two memory transcripts use the same customer ID and distinct application
+   and runtime sessions, with successful recall of Jane and concise responses.
+   The first 45-second attempt was too early: actual extraction took about
+   64 seconds. The original success evidence and timing explanation are retained.
+
+5. Sandboxed calculation
+   @tool calculate_loyalty_discount builds self-contained Decimal-based Python
+   for points blocks/caps, tier discount, and category earn rates. It calls
+   executeCode inside code_session(REGION) with clearContext=True. Both normal
+   and tier-only fallback JSON results have points_redeemed, tier_discount_pct,
+   final_total and remaining_points. tier_discount_pct=10 means 10 percent.
+   Sandbox output is parsed and required fields are checked before returning.
+   Displayed and saved calculations are rendered directly from the tool data,
+   preventing model arithmetic from contradicting the sandbox result.
+   Unit tests cover the fallback and incomplete sandbox output. The live tool
+   trace is checked for calculation_source=agentcore_code_interpreter, not fallback.
+
+6. Browser
+   AgentCoreBrowser receives REGION and its browser tool is added to the agent.
+   The browser JSON trace contains successful navigation, actual HTML and a
+   document.title evaluation from the live Udacity site. It also retains three
+   initial invalid session-name attempts, followed by successful recovery.
+   The final CLI response is successful; intermediate retries are not hidden.
+
+7. Reflection
+   reflection.txt is 311 words. It names AgentCore Code Interpreter and explains
+   deterministic Decimal calculations, describes Gateway naming and managed S3
+   connector challenges and their fixes, and gives specific production identity,
+   authorization, refund idempotency, retention and monitoring considerations.
+
+Optional suggestions
+   Required-field validation was added to discount output. No Pydantic response
+   model, long-conversation summarizer, or domain change is claimed. These are
+   optional enhancements rather than requirements for the criteria above.
+
+
+Evidence capture details
+The agentcore CLI renders only the response field; it omits sibling tool_trace
+fields. The *-tool-trace.json files therefore preserve complete responses from
+AWS invoke_agent_runtime, including real request IDs, prompts and sessions.
+They are separate live conversations supplementing the CLI command transcripts.
+The paired memory evidence is retained from the original successful cross-session
+test. API, Lambda, RAG and browser traces were collected after adding trace support;
+the final discount trace and CLI transcript verify the later grounding fix.

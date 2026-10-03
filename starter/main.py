@@ -56,6 +56,39 @@ def plain_text(message):
     return "\n".join(block["text"] for block in blocks if block.get("text"))
 
 
+def ground_calculation_response(messages):
+    """Render the current turn's calculation directly from authoritative tool data."""
+    start = next((i for i in range(len(messages) - 1, -1, -1)
+                  if messages[i].get("role") == "user" and plain_text(messages[i])), len(messages))
+    blocks = [block for message in messages[start:] for block in message.get("content", [])]
+    ids = {block["toolUse"]["toolUseId"] for block in blocks
+           if block.get("toolUse", {}).get("name") == "calculate_loyalty_discount"}
+    for block in reversed(blocks):
+        result = block.get("toolResult", {})
+        if result.get("toolUseId") not in ids or result.get("status") != "success":
+            continue
+        for content in result.get("content", []):
+            try:
+                data = json.loads(content.get("text", ""))
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(data, dict) or "calculation_source" not in data:
+                continue
+            lines = [f"Points redeemed: {data['points_redeemed']}",
+                     f"Tier discount: {data['tier_discount_pct']}% (${data['tier_discount']})",
+                     f"Final total: ${data['final_total']}",
+                     f"Remaining points after redemption: {data['remaining_points']}"]
+            if data["calculation_source"] == "tier_only_fallback":
+                lines.insert(0, "Tier-only estimate: " + data["warning"])
+            else:
+                lines += [f"Points discount: ${data['points_discount']}",
+                          f"Total savings: ${data['total_savings']}",
+                          f"Points earned: {data['points_earned']}",
+                          f"Points balance after purchase: {data['points_balance_after_purchase']}"]
+            messages[-1]["content"] = [{"text": "\n".join(lines)}]
+            return
+
+
 class MemoryHook(HookProvider):
     """Retrieve actor-scoped facts; save original turns without injected context."""
 
@@ -95,6 +128,7 @@ class MemoryHook(HookProvider):
             message["content"] = [{"text": "Customer Context:\n" + "\n".join(memories) + "\n\n" + query}]
 
     def save_support_interaction(self, event: AfterInvocationEvent):
+        ground_calculation_response(event.agent.messages)
         customer_query = ""
         agent_response = ""
         for message in reversed(event.agent.messages):
@@ -259,7 +293,7 @@ refund IDs, memories, search results or successful tool execution."""
             agent = Agent(model=model, tools=tools, hooks=[hook], messages=history,
                           system_prompt=system_prompt, callback_handler=None)
             result = await agent.invoke_async(user_input)
-        text = "\n".join(block["text"] for block in result.message.get("content", []) if "text" in block)
+        text = plain_text(agent.messages[-1])
         if hook.warnings:
             text += "\n\n" + " ".join(dict.fromkeys(hook.warnings))
         text = text or "The agent did not return a text response. Please retry."

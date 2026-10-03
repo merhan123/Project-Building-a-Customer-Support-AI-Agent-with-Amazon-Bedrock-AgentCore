@@ -1,0 +1,226 @@
+{
+  "utc": "2026-10-03T17:06:22.189086+00:00",
+  "runtime_arn": "arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM",
+  "runtime_session": "715ac3ee-6efa-41a9-8aa9-d39c780202f0",
+  "request_id": "39d751fc-8791-4ec5-b4a8-f7ca93ca6ec5",
+  "payload": {
+    "prompt": "Go to https://www.udacity.com and tell me the page title.",
+    "customer_id": "CUST-123",
+    "session_id": "t6-trace-9c493572",
+    "include_tool_trace": true
+  },
+  "response": {
+    "response": "The page title of https://www.udacity.com is **\"Learn the Latest Tech Skills; Advance Your Career | Udacity\"**.",
+    "tool_trace": [
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_EgOe0HFZB8eGf25aOwrve6",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "init_session",
+                "description": "Initialize browser session to fetch page title",
+                "session_name": "udacity_title_check"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "toolUseId": "tooluse_EgOe0HFZB8eGf25aOwrve6",
+          "status": "error",
+          "content": [
+            {
+              "text": "Error: Validation failed for input parameters: 1 validation error for BrowserTool\nbrowser_input.action.init_session.session_name\n  String should match pattern '^[a-z0-9-]+$' [type=string_pattern_mismatch, input_value='udacity_title_check', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch"
+            }
+          ]
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_hrevFbZv0GUbD5uKMdjOkA",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "init_session",
+                "description": "Initialize browser session to fetch page title",
+                "session_name": "udacity_title_check_session"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "toolUseId": "tooluse_hrevFbZv0GUbD5uKMdjOkA",
+          "status": "error",
+          "content": [
+            {
+              "text": "Error: Validation failed for input parameters: 1 validation error for BrowserTool\nbrowser_input.action.init_session.session_name\n  String should match pattern '^[a-z0-9-]+$' [type=string_pattern_mismatch, input_value='udacity_title_check_session', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch"
+            }
+          ]
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_MamZnk6VEfWFDuUMWs94aG",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "init_session",
+                "description": "Initialize browser session to fetch page title",
+                "session_name": "udacity_title"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "toolUseId": "tooluse_MamZnk6VEfWFDuUMWs94aG",
+          "status": "error",
+          "content": [
+            {
+              "text": "Error: Validation failed for input parameters: 1 validation error for BrowserTool\nbrowser_input.action.init_session.session_name\n  String should match pattern '^[a-z0-9-]+$' [type=string_pattern_mismatch, input_value='udacity_title', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch"
+            }
+          ]
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_WnHlXlPPK8R0BHmvCVUHK4",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "init_session",
+                "description": "Initialize browser session to fetch page title",
+                "session_name": "udacitytitle"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "content": [
+            {
+              "json": {
+                "sessionName": "udacitytitle",
+                "description": "Initialize browser session to fetch page title"
+              }
+            }
+          ],
+          "toolUseId": "tooluse_WnHlXlPPK8R0BHmvCVUHK4"
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_v8TKRdmKVPN0HlQvGsxdsY",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "navigate",
+                "url": "https://www.udacity.com",
+                "session_name": "udacitytitle"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "content": [
+            {
+              "text": "Navigated to https://www.udacity.com"
+            }
+          ],
+          "toolUseId": "tooluse_v8TKRdmKVPN0HlQvGsxdsY"
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_dcIYklgN6Cho5xfhUNvbRm",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "get_html",
+                "session_name": "udacitytitle"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "content": [
+            {
+              "text": "<!DOCTYPE html><html lang=\"en-US\" data-theme=\"light\" style=\"color-scheme: light;\" dir=\"ltr\"><head><script type=\"text/javascript\" async=\"\" src=\"https://cdn.getblueshift.com/blueshift.js\"></script><script type=\"text/javascript\" async=\"\" src=\"https://www.googletagmanager.com/gtm.js?id=GTM-WW3F3H&amp;l=dataLayer\"></script><script type=\"text/javascript\" async=\"\" src=\"https://cdn.amplitude.com/libs/amplitude-5.2.2-min.gz.js\"></script><script type=\"text/javascript\" src=\"https://sgmt.udacity.com/next-integrations/integrations/vendor/commons.1b78f84a8c1751144d06.js.gz\" async=\"\" status=\"loaded\"></script><script type=\"text/javascript\" src=\"https://sgmt.udacity.com/next-integrations/integrations/vendor/commons.59560acdd69ed701c941.js.gz\" async=\"\" status=\"loaded\"></script><script type=\"text/javascript\" src=\"https://sgmt.udacity.com/next-integrations/integrations/blueshift/2.0.1/blueshift.dynamic.js.gz\" async=\"\" status=\"loaded\"></script><script type=\"text/javascript\" src=\"https://sgmt.udacity.com/ne..."
+            }
+          ],
+          "toolUseId": "tooluse_dcIYklgN6Cho5xfhUNvbRm"
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_YC516EpacyHps8N62CTiwy",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "evaluate",
+                "session_name": "udacitytitle",
+                "script": "document.title"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "content": [
+            {
+              "text": "Evaluation result: Learn the Latest Tech Skills; Advance Your Career | Udacity"
+            }
+          ],
+          "toolUseId": "tooluse_YC516EpacyHps8N62CTiwy"
+        }
+      },
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_YY19B2VPm5gF0nJOKScOOt",
+          "name": "browser",
+          "input": {
+            "browser_input": {
+              "action": {
+                "type": "close",
+                "session_name": "udacitytitle"
+              }
+            }
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "content": [
+            {
+              "text": "Browser closed"
+            }
+          ],
+          "toolUseId": "tooluse_YY19B2VPm5gF0nJOKScOOt"
+        }
+      }
+    ]
+  }
+}

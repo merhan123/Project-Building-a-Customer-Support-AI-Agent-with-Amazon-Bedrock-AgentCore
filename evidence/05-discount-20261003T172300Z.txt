@@ -1,0 +1,26 @@
+UTC: 20261003T172300Z
+Runtime session: 028f82c7-f0d2-46ef-8a35-795458d4d486
+Command: agentcore invoke '{"prompt": "I am a Gold member with 4250 points. Calculate my discount on a $150 standard order.", "customer_id": "CUST-123", "session_id": "t5-3c27e789", "include_tool_trace": true}' --session-id 028f82c7-f0d2-46ef-8a35-795458d4d486
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: 028f82c7-f0d2-46ef-8a35-795458d4d486                                                                                                                │
+│ Request ID: 20ebc4c7-f044-4ccb-8dd6-bfb1c27e320b                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+Points redeemed: 4000
+Tier discount: 10% ($11.00)
+Final total: $99.00
+Remaining points after redemption: 250
+Points discount: $40.00
+Total savings: $51.00
+Points earned: 99
+Points balance after purchase: 349
+
+STDERR:

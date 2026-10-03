@@ -1,0 +1,40 @@
+{
+  "utc": "2026-10-03T17:22:46.743329+00:00",
+  "runtime_arn": "arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM",
+  "runtime_session": "87c52d7d-5f7f-4c9c-8d35-fee1b16d0867",
+  "request_id": "9b34ff73-1953-4e36-a658-e917f58b4803",
+  "payload": {
+    "prompt": "I am a Gold member with 4250 points. Calculate my discount on a $150 standard order.",
+    "customer_id": "CUST-123",
+    "session_id": "t5-trace-0f7d5d4c",
+    "include_tool_trace": true
+  },
+  "response": {
+    "response": "Points redeemed: 4000\nTier discount: 10% ($11.00)\nFinal total: $99.00\nRemaining points after redemption: 250\nPoints discount: $40.00\nTotal savings: $51.00\nPoints earned: 99\nPoints balance after purchase: 349",
+    "tool_trace": [
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_l14CDGjIHE4XPcAakorqaL",
+          "name": "calculate_loyalty_discount",
+          "input": {
+            "order_total": 150.0,
+            "loyalty_points": 4250,
+            "tier": "Gold",
+            "product_category": "standard"
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "toolUseId": "tooluse_l14CDGjIHE4XPcAakorqaL",
+          "status": "success",
+          "content": [
+            {
+              "text": "{\"points_redeemed\": 4000, \"points_discount\": \"40.00\", \"tier_discount_pct\": 10, \"tier_discount_rate\": \"0.10\", \"tier_discount\": \"11.00\", \"final_total\": \"99.00\", \"total_savings\": \"51.00\", \"points_earned\": 99, \"remaining_points\": 250, \"points_balance_after_purchase\": 349, \"calculation_source\": \"agentcore_code_interpreter\"}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

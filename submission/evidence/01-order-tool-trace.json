@@ -1,0 +1,38 @@
+{
+  "utc": "2026-10-03T17:04:21.156606+00:00",
+  "runtime_arn": "arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM",
+  "runtime_session": "c70b23d7-6496-4055-8869-a5b0aeb45041",
+  "request_id": "3464ad2c-9e54-44ad-ac65-29806cb93186",
+  "payload": {
+    "prompt": "Can you track order ORD-001?",
+    "customer_id": "CUST-123",
+    "session_id": "t1-trace-292f9ec6",
+    "include_tool_trace": true
+  },
+  "response": {
+    "response": "Here is the current status of your order **ORD-001**:\n\n- **Item:** Wireless Headphones Pro (1 unit)\n- **Total:** $89.99\n- **Status:** SHIPPED\n- **Carrier:** UPS\n- **Tracking Number:** TRK987654321\n- **Estimated Delivery:** October 5, 2026\n\nYour order is on its way and should arrive by the estimated date. If you need further assistance with tracking or have any other questions, feel free to ask!",
+    "tool_trace": [
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_7wtT9BsLCCkFAfYSz0cIwZ",
+          "name": "order-tracker___get_order",
+          "input": {
+            "order_id": "ORD-001"
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "toolUseId": "tooluse_7wtT9BsLCCkFAfYSz0cIwZ",
+          "content": [
+            {
+              "text": "{\"order_id\":\"ORD-001\",\"customer_id\":\"CUST-123\",\"status\":\"SHIPPED\",\"items\":[{\"name\":\"Wireless Headphones Pro\",\"qty\":1,\"price\":89.99}],\"total\":89.99,\"tracking_number\":\"TRK987654321\",\"carrier\":\"UPS\",\"estimated_delivery\":\"2026-10-05\"}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    ]
+  }
+}

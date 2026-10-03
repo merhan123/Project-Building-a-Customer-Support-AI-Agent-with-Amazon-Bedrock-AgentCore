@@ -1,0 +1,40 @@
+{
+  "utc": "2026-10-03T17:04:32.250006+00:00",
+  "runtime_arn": "arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM",
+  "runtime_session": "7bf73e03-42c1-44e1-836e-d1f2b2805169",
+  "request_id": "58c585fe-3214-49e9-b546-e0d435610cad",
+  "payload": {
+    "prompt": "I want to return my Kindle Paperwhite (ORD-002). Please initiate a refund.",
+    "customer_id": "CUST-123",
+    "session_id": "t2-trace-2f89c102",
+    "include_tool_trace": true
+  },
+  "response": {
+    "response": "Your refund for the Kindle Paperwhite (ORD-002) has been approved! \n\n**Refund ID:** REF-7Q39X3J8  \n**Amount:** $139.99  \n**Status:** Approved  \n**Credit Timeline:** 3-5 business days\n\nThe refund is now being processed and you'll see the credit in your account within the next 3-5 business days.",
+    "tool_trace": [
+      {
+        "toolUse": {
+          "toolUseId": "tooluse_ECrPZPL20gMrnhID1EEOZ5",
+          "name": "refund-processor___initiate_refund",
+          "input": {
+            "reason": "Customer requested return",
+            "order_id": "ORD-002",
+            "amount": 139.99
+          }
+        }
+      },
+      {
+        "toolResult": {
+          "status": "success",
+          "toolUseId": "tooluse_ECrPZPL20gMrnhID1EEOZ5",
+          "content": [
+            {
+              "text": "{\"statusCode\":200,\"body\":\"{\\\"refund_id\\\": \\\"REF-7Q39X3J8\\\", \\\"order_id\\\": \\\"ORD-002\\\", \\\"status\\\": \\\"APPROVED\\\", \\\"amount\\\": 139.99, \\\"message\\\": \\\"Refund approved. Credit appears in 3-5 business days.\\\", \\\"created_at\\\": \\\"2026-10-03T17:04:31.189855+00:00\\\"}\"}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    ]
+  }
+}

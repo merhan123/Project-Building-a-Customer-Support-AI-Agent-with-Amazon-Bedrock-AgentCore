@@ -1,0 +1,20 @@
+UTC: 20261003T163826Z
+Runtime session: 51db9e2c-635b-478c-b004-3690c72e2ef1
+Command: agentcore invoke '{"prompt": "I want to return my Kindle Paperwhite (ORD-002). Please initiate a refund.", "customer_id": "CUST-123", "session_id": "t2-680d2240", "include_tool_trace": true}' --session-id 51db9e2c-635b-478c-b004-3690c72e2ef1
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: 51db9e2c-635b-478c-b004-3690c72e2ef1                                                                                                                │
+│ Request ID: 551f0a99-53c2-45ca-a647-ceb5275510f9                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+Your refund for the Kindle Paperwhite (order ORD-002) has been approved. A credit of $139.99 will appear on your account within 3-5 business days. Your refund 
+ID is **REF-X7YOVK7I**.
+
+STDERR:

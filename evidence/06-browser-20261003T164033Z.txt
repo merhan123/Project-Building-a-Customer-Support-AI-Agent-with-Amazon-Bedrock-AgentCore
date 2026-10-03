@@ -1,12 +1,12 @@
-UTC: 20261003T163023Z
-Runtime session: 9bd7d1de-4ea8-44d6-91fb-91c0f982bb0f
-Command: agentcore invoke '{"prompt": "Go to https://www.udacity.com and tell me the page title.", "customer_id": "CUST-123", "session_id": "t6"}' --session-id 9bd7d1de-4ea8-44d6-91fb-91c0f982bb0f
+UTC: 20261003T164033Z
+Runtime session: 019a6dd0-6ec5-4606-b802-e9eae3b30fa4
+Command: agentcore invoke '{"prompt": "Go to https://www.udacity.com and tell me the page title.", "customer_id": "CUST-123", "session_id": "t6-c86278c6", "include_tool_trace": true}' --session-id 019a6dd0-6ec5-4606-b802-e9eae3b30fa4
 Exit code: 0
 
 STDOUT:
 ╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
-│ Session: 9bd7d1de-4ea8-44d6-91fb-91c0f982bb0f                                                                                                                │
-│ Request ID: 4d0df680-2955-4bd3-9475-34f609cec87e                                                                                                             │
+│ Session: 019a6dd0-6ec5-4606-b802-e9eae3b30fa4                                                                                                                │
+│ Request ID: acc01500-e32b-48f2-8c46-5a10cb349583                                                                                                             │
 │ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
 │ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
 │       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
@@ -14,8 +14,6 @@ STDOUT:
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 Response:
-The page title of https://www.udacity.com is:
-
-**"Learn the Latest Tech Skills; Advance Your Career | Udacity"**
+The page title of https://www.udacity.com is **"Learn the Latest Tech Skills; Advance Your Career | Udacity"**.
 
 STDERR:

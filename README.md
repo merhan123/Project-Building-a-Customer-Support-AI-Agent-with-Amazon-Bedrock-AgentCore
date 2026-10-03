@@ -1,384 +1,242 @@
-# Project: Building a Customer Support AI Agent with Amazon Bedrock AgentCore
+# Customer Support AI Agent with Amazon Bedrock AgentCore
 
 **Udacity — AWS AI Engineering Nanodegree**
 
----
+A deployed customer support agent for a fictional e-commerce store. The agent tracks orders, processes demo refunds, answers product and policy questions, remembers customer preferences, calculates loyalty discounts, and retrieves live web content.
 
-## Overview
+The implementation uses Amazon Nova 2 Lite with the Strands Agents SDK and Amazon Bedrock AgentCore. The recorded validation on **October 3, 2026** covers all six required scenarios and eight local regression tests. See the [rubric assessment](rubric-assessment.txt) for the seven required criteria and their evidence.
 
-In this project you will build a functional AI customer support agent for a fictional Amazon store. Starting from a simple local chatbot, you will progressively add cloud infrastructure, external tool integration, a knowledge base, persistent memory, a code interpreter, and a browser — finishing with a deployable agent that can handle customer inquiries end-to-end.
+**Submission:** [submission.zip](submission.zip) · [Evidence index](submission/EVIDENCE.txt) · [Reflection](reflection.txt)
 
-By the end of the project your agent will be able to:
+## Architecture
 
-- Answer questions about products, return policies, and loyalty rewards using Retrieval-Augmented Generation (RAG)
-- Look up order status and process refunds by calling Lambda functions through the AgentCore Gateway
-- Remember customer preferences and conversation history across multiple sessions
-- Calculate exact loyalty discounts using a secure code sandbox
-- Navigate websites to fetch live information
-
----
-
-## Learning Objectives
-
-After completing this project you will be able to:
-
-1. Deploy an AI agent to Amazon Bedrock AgentCore
-2. Wire up API Gateway and Lambda tools via the AgentCore Gateway using the Model Context Protocol (MCP)
-3. Implement RAG with a Bedrock Knowledge Base
-4. Add short-term (session) and long-term (cross-session) memory using AgentCore Memory
-5. Use the AgentCore Code Interpreter for precise computation
-6. Integrate the AgentCore Browser tool for live web access
-
----
-
-## Prerequisites
-
-### AWS Account
-
-- An active AWS account with permission to create and manage:
-  - IAM roles and policies
-  - Lambda functions
-  - API Gateway REST APIs
-  - Amazon Bedrock Managed Knowledge Bases (with S3 access)
-  - Amazon Bedrock AgentCore resources (Runtime, Gateway, Memory)
-- All resources should be created in **us-east-1** (N. Virginia) unless stated otherwise.
-
-### Local Development Environment
-
-| Tool | Version |
-|------|---------|
-| Python | 3.13+ |
-| [uv](https://docs.astral.sh/uv/) | Latest |
-| AWS CLI | v2 |
-| AgentCore CLI (`agentcore`) | Installed via `bedrock-agentcore-starter-toolkit` |
-| Node.js (for MCP Inspector) | 18+ |
-
-### Model Access
-
-Enable the following model in the Amazon Bedrock console under **Model access**:
-
-- **Amazon Nova 2 Lite** (`amazon.nova-2-lite-v1:0`). The starter code invokes its global inference profile, `global.amazon.nova-2-lite-v1:0`.
-
-> **CLI compatibility:** This released project intentionally uses the Python-based
-> Bedrock AgentCore Starter Toolkit CLI. AWS recommends the newer npm-based
-> AgentCore CLI for new projects, but its project format and commands differ from
-> this project. Do not install both CLIs in the same environment because both
-> provide an `agentcore` command.
-
----
-
-## Project Structure
-
-```
-project/
-└── starter/
-    ├── main.py                  ← your starting point (fill in the TODOs)
-    ├── setup_permissions.py     ← run after deployment to configure the agent role
-    ├── pyproject.toml           ← Python dependencies
-    ├── product_catalog.txt      ← upload to the Knowledge Base
-    └── lambda/
-        ├── order_tracker.py     ← deploy as-is
-        ├── refund_processor.py  ← deploy as-is
-        └── lambda_schema        ← refund tool schema
+```text
+agentcore invoke / InvokeAgentRuntime
+                  |
+         AgentCore Runtime
+       Strands + Nova 2 Lite
+                  |
+    +-------------+-------------------+------------------+
+    |             |                   |                  |
+ MCP Gateway   Knowledge Base    AgentCore Memory    AgentCore tools
+    |          Retrieve API      facts/preferences   Code Interpreter
+    |             |                                  Browser
+    |          S3 catalog
+    +-- API Gateway target --> order-tracker Lambda
+    +-- Lambda target -------> refund-processor Lambda
 ```
 
----
+The module-level `BedrockAgentCoreApp` exposes an async `invoke` entrypoint and runs through `app.run()`. The model uses the inference profile `global.amazon.nova-2-lite-v1:0`.
 
-## Part 1 — AWS Infrastructure Setup
+| Capability | Implementation |
+| --- | --- |
+| External tools | `MCPClient` loads Gateway tools and adds them to the agent. |
+| RAG | `search_knowledge_base` calls Retrieve, joins text chunks, and handles an unconfigured knowledge base. |
+| Memory | `MemoryHook` retrieves strategy-tagged context and saves the original query and final response. Namespace discovery supports both `namespaceTemplates` and legacy `namespaces`. |
+| Calculation | `calculate_loyalty_discount` executes self-contained Python with `Decimal` in AgentCore Code Interpreter, using `clearContext=True`. |
+| Browsing | `AgentCoreBrowser` retrieves live content and closes its browser resources after invocation. |
+| Tool evidence | Optional `include_tool_trace` output preserves actual tool inputs and results. |
 
-Complete these steps **before** writing any agent code.
+### Gateway targets
 
-### Step 1.1 — Project Initialisation
+| Target | Target type | Tools |
+| --- | --- | --- |
+| `order-tracker` | API Gateway | `get_order`, `get_customer_orders`, `get_customer` |
+| `refund-processor` | Lambda | `initiate_refund`, `check_refund_status`, `get_return_label` |
 
-```bash
-# From the repository root
-cd starter
-uv sync --python 3.13
+Gateway tool names include their target prefix, for example `order-tracker___get_order`. Target names use hyphens because AWS rejected underscores during setup. The API Gateway routes use IAM authorization; the lab MCP Gateway uses `NONE` inbound authorization.
+
+The knowledge base uses the managed S3 connector (`MANAGED_KNOWLEDGE_BASE_CONNECTOR`), backed by [product_catalog.txt](starter/product_catalog.txt). Memory uses semantic and user-preference strategies with `cs_agent/{actorId}/facts` and `cs_agent/{actorId}/preferences` namespaces.
+
+## Project TODOs with implemented solutions
+
+The original learning tasks are retained below as completed TODOs. Each solution points to the working implementation in [starter/main.py](starter/main.py); these are completed requirements, not unfinished code placeholders.
+
+### TODO 1 — Configuration and initialisation ✅
+
+**Task:** Fill in the resource IDs and initialise the runtime, model, and AWS clients.
+
+**Solution:** Configure `GATEWAY_URL`, `KB_ID`, `MEMORY_ID`, and `REGION`. Create `app = BedrockAgentCoreApp()` at module level, initialise `BedrockModel` with `global.amazon.nova-2-lite-v1:0`, and create `MemoryClient` and the `bedrock-agent-runtime` boto3 client. The configured identifiers match the project inventory in [resources.json](resources.json).
+
+### TODO 2 — Knowledge Base tool ✅
+
+**Task:** Implement `search_knowledge_base(query)` using the Retrieve API and join retrieved text chunks.
+
+**Solution:** The `@tool` function documents when to search product and policy information, checks for a missing `KB_ID`, calls `_bedrock_runtime.retrieve(...)`, extracts text from `retrievalResults`, and joins nonempty chunks with `"\n---\n"`. Empty results and service failures return descriptive messages instead of invented information.
+
+**Validation:** The RAG test retrieves Platinum membership benefits from the catalog. See Test 3 in the recorded results below.
+
+### TODO 3 — Long-term memory hook ✅
+
+**Task:** Discover memory namespaces, retrieve customer context before a response, and persist the completed interaction afterward.
+
+**Solution:** `get_namespaces` maps strategy types to `namespaceTemplates`, falling back to legacy `namespaces`. `MemoryHook` extends `HookProvider`; `register_hooks` connects `MessageAddedEvent` to `retrieve_customer_context` and `AfterInvocationEvent` to `save_support_interaction`. Retrieval searches every configured strategy namespace, tags each memory by strategy, and prepends it to the user message. Persistence extracts the original user query and final assistant response and calls `memory_client.create_event()`.
+
+**Validation:** Two separate sessions with the same customer ID demonstrate recall of Jane and her preference for concise responses. The test runner allows 90 seconds for asynchronous extraction.
+
+### TODO 4 — Loyalty discount tool with Code Interpreter ✅
+
+**Task:** Implement `calculate_loyalty_discount(loyalty_points, tier, order_total, product_category)` with sandboxed business rules and an unavailable-interpreter fallback.
+
+**Solution:** The `@tool` function builds self-contained Python using `Decimal` for points redemption, tier discounts, and category earn rates. It executes the code through `code_session(REGION).invoke("executeCode", ...)` with `clearContext=True`, parses and validates the result, and returns JSON containing `points_redeemed`, `tier_discount_pct`, `final_total`, and `remaining_points`. A labeled fallback computes only the tier discount. `ground_calculation_response` keeps the displayed and saved amounts consistent with the actual tool result.
+
+**Validation:** The Gold-member example with 4,250 points and a $150 purchase returns a $99 final total. Local tests also exercise rounding, invalid inputs, and fallback behavior.
+
+### TODO 5 — Main entrypoint and tool integration ✅
+
+**Task:** Implement `invoke(payload, context)`, connect Gateway tools, attach memory and browser capabilities, and return the agent response.
+
+**Solution:** The async function uses `@app.entrypoint`, validates the prompt and customer/session IDs, creates `MemoryHook` and `AgentCoreBrowser(region=REGION, ...)`, and restores session history. Inside an `MCPClient` connection, it loads all Gateway tool pages and combines them with `search_knowledge_base`, `calculate_loyalty_discount`, and `browser.browser`. The Strands agent runs with these tools and the memory hook. The entrypoint returns the final response, optionally includes real tool traces, and closes browser resources in `finally`. The module launches with `app.run()`.
+
+**Validation:** Order and refund traces show successful API-backed and Lambda-backed calls; the browser trace demonstrates live page retrieval.
+
+### TODO 6 — Deploy to AgentCore and verify ✅
+
+**Task:** Configure and deploy the cloud runtime, grant integration permissions, and invoke the deployed agent.
+
+**Solution:** Use the Python Starter Toolkit's `agentcore configure` and `agentcore deploy`, then run `setup_permissions.py --profile udacity` to grant access to the configured integrations. The exact commands are retained in **Provisioning and deployment** below. Toolkit automatic memory creation is disabled because this implementation uses its separately configured memory resource.
+
+**Validation:** The submission contains seven `agentcore invoke` transcripts covering all six scenarios, including both memory sessions, plus full SDK tool traces and eight passing local regression tests.
+
+## Repository contents
+
+```text
+.
+├── README.md
+├── resources.json                 # Non-secret AWS resource inventory
+├── provision.py                   # Resumable, account-guarded lab provisioning
+├── verify_setup.py                # Live Gateway, knowledge base, and memory checks
+├── run_submission_tests.py         # CLI evidence for six scenarios / seven calls
+├── capture_tool_traces.py          # Complete SDK responses with tool traces
+├── rubric-assessment.txt           # Criterion-by-criterion assessment
+├── reflection.txt                  # 311-word project reflection
+├── starter/
+│   ├── main.py                    # Completed runtime agent
+│   ├── setup_permissions.py       # Runtime integration permissions
+│   ├── pyproject.toml
+│   ├── uv.lock
+│   ├── product_catalog.txt
+│   └── lambda/
+│       ├── order_tracker.py
+│       ├── refund_processor.py
+│       └── lambda_schema
+├── tests/test_agent.py             # Eight local regression tests
+├── evidence/                      # Live results plus diagnostic attempts
+├── submission/                    # Curated submission files and evidence
+└── submission.zip
 ```
 
-Run the `agentcore` commands below from `starter/` using `uv run agentcore`
-if your virtual environment is not activated.
+## Local setup
 
-### Step 1.2 — Deploy the Lambda Functions
-
-The two Lambda functions (`order_tracker.py` and `refund_processor.py`) are provided in `starter/lambda/`. Deploy them to AWS Lambda before proceeding.
-
-1. In the AWS Lambda console, create two new functions (Python 3.12 runtime):
-   - `order-tracker`
-   - `refund-processor`
-2. Paste the contents of each file into the inline code editor (or zip and upload).
-3. Attach an execution role with basic Lambda permissions (CloudWatch Logs).
-4. Note the ARN of each function — you will need them in the next step.
-
-### Step 1.3 — Set Up API Gateway and AgentCore Gateway
-
-The two provided Lambda functions use different integrations:
-
-- `order-tracker` expects an API Gateway proxy event containing `resource`,
-  `httpMethod`, and `pathParameters`.
-- `refund-processor` expects direct AgentCore Gateway tool arguments and reads
-  the selected tool name from the Lambda client context.
-
-Configure them as follows.
-
-#### A. Expose `order-tracker` through API Gateway
-
-1. In **API Gateway**, create a REST API.
-2. Create these resources and methods:
-   - `GET /orders/{order_id}`
-   - `GET /customers/{customer_id}/orders`
-   - `GET /customers/{customer_id}`
-3. Configure every method as a **Lambda proxy integration** with the
-   `order-tracker` Lambda function.
-4. Give the operations unique operation names, such as `get_order`,
-   `get_customer_orders`, and `get_customer`. These become MCP tool names.
-5. Deploy the REST API to a stage, such as `prod`.
-
-#### B. Create the AgentCore Gateway and targets
-
-1. Open **Amazon Bedrock** → **AgentCore** → **Gateways**.
-2. Create `CustomerSupportGateway` with the **NONE** authorizer. The starter's
-   MCP connection is unsigned, so another authorizer will reject it.
-3. Add the deployed REST API stage as an **API Gateway target** named
-   `order_tracker`, exposing the three GET methods above.
-4. Add `refund-processor` as a **Lambda target** named `refund_processor` and
-   import `starter/lambda/lambda_schema` as its tool schema.
-5. Copy the Gateway URL ending in `/mcp` into `GATEWAY_URL` in `main.py`.
-
-> The NONE authorizer is used only to keep this sandbox project focused on tool
-> integration. Do not use it for a production Gateway, do not send sensitive
-> data through it, and delete the Gateway after completing the project.
-
-**Verify with MCP Inspector:**
-```bash
-npx @modelcontextprotocol/inspector
-# Connect to your Gateway URL and confirm the three order tools and three
-# refund tools are listed. Names may be prefixed as target_name___tool_name.
-```
-
-### Step 1.4 — Create the Knowledge Base
-
-1. Upload `starter/product_catalog.txt` to an **S3 bucket** in your account.
-2. In **Amazon Bedrock AgentCore → Built-in tools → Knowledge Base**, choose
-   **Create Managed Knowledge Base**:
-   - Name: `CustomerSupportKB`
-   - Embedding model type: **Managed**
-   - Service role: let the console create a new role
-   - Data source: the S3 bucket and `product_catalog.txt` from above
-   - Use the default encryption settings
-3. **Sync** the data source and wait for the sync to complete.
-4. Copy the **Knowledge Base ID** — paste it into `KB_ID` in your `main.py`.
-
-**Verify:**
-```bash
-# In the console, use the Knowledge Base "Test" tab
-# Query: "What is the return policy for electronics?"
-# Expected: 15-day return window for electronics
-```
-
-### Step 1.5 — Create the AgentCore Memory Resource
-
-1. In the Bedrock console → **AgentCore** → **Memory**, create a new Memory resource:
-   - Name: `CustomerSupportMemory`
-2. Add two **Memory Strategies**:
-
-   | Strategy | Name | Namespace |
-   |---|---|---|
-   | Semantic extraction | `customer_facts` | `cs_agent/{actorId}/facts` |
-   | User preference | `customer_preferences` | `cs_agent/{actorId}/preferences` |
-
-3. Wait until the memory is **ACTIVE**, then copy its **Memory ID** into `MEMORY_ID` in `main.py`. If an initial invocation reports that memory is not active, wait a few minutes and retry.
-
----
-
-## Part 2 — Building the Agent
-
-Open `starter/main.py`. It contains scaffolding and `# TODO` comments marking every section you need to implement. Work through the TODOs in order.
-
-### Section 1 — Configuration and Initialisation
-
-Fill in your resource IDs and set up:
-- `BedrockAgentCoreApp`
-- `BedrockModel` with Amazon Nova 2 Lite
-- `MemoryClient` and `boto3` Bedrock runtime client
-
-### Section 2 — Knowledge Base Tool
-
-Implement `search_knowledge_base(query)`:
-- Call the Bedrock Knowledge Base Retrieve API
-- Join result chunks with `"\n---\n"`
-
-**Test:**
-```bash
-agentcore invoke '{"prompt": "Is the Kindle Paperwhite waterproof?"}'
-# Expected: mention of IPX8 rating
-```
-
-### Section 3 — Long-Term Memory Hook
-
-Implement `MemoryHook` with two methods:
-- `retrieve_customer_context` — query all memory namespaces and prepend results to the user message
-- `save_support_interaction` — save the completed (user, assistant) turn after each response
-
-When reading a strategy's namespace, use `namespaceTemplates[0]` and fall back
-to the legacy `namespaces[0]` field when needed.
-
-### Section 4 — Loyalty Discount Tool (Code Interpreter)
-
-Implement `calculate_loyalty_discount(loyalty_points, tier, order_total, product_category)`:
-- Build a Python code string containing the discount logic
-- Execute it with `code_session()` and return the JSON result
-- Include a fallback for when the Code Interpreter is unavailable
-
-**Test:**
-```bash
-agentcore invoke '{"prompt": "I am a Gold member with 4250 points. Calculate my discount on a $150 order.", "customer_id": "CUST-123", "session_id": "s1"}'
-```
-
-### Section 5 — Main Entrypoint
-
-Implement the `invoke(payload, context)` function:
-- Extract `prompt`, `customer_id`, and `session_id` from the payload
-- Instantiate `MemoryHook` and `AgentCoreBrowser`
-- Connect to the Gateway via `MCPClient` and load gateway tools
-- Build the `Agent` with all tools and hooks and return its response
-
-### Section 6 — Deploy to AgentCore
-
-```bash
-# Configure the Starter Toolkit CLI (first time only)
-agentcore configure --entrypoint main.py --name <your-agent-name> --deployment-type direct_code_deploy --runtime PYTHON_3_13 --disable-memory
-
-# Deploy the agent
-agentcore deploy
-```
-
-`--disable-memory` disables only the toolkit's automatic memory creation; your
-agent uses the memory you created in Step 1.5. Let the toolkit create the runtime
-execution role when prompted.
-
-After deployment, run this from `starter/` using your student AWS credentials.
-Make sure `KB_ID`, `MEMORY_ID` and `REGION` are filled in as strings in `main.py`:
-
-```bash
-uv run setup_permissions.py
-```
-
-This grants the agent access to your KB, memory and browser. Rerun it if you
-change your resource IDs or execution role.
-
-Wait briefly for the policy to take effect, then invoke the deployed agent:
-
-```bash
-agentcore invoke '{"prompt": "Hello, what can you help me with?", "customer_id": "CUST-123", "session_id": "test-1"}'
-```
-
----
-
-## Part 3 — Functional Testing
-
-Run the following test scenarios and verify the expected behaviour. Include screenshots or copy the terminal output in your submission.
-
-### Test 1 — Order Tracking
-
-```bash
-agentcore invoke '{"prompt": "Can you track order ORD-001?", "customer_id": "CUST-123", "session_id": "t1"}'
-# Expected: shipping status, tracking number TRK987654321, carrier UPS, estimated delivery
-```
-
-### Test 2 — Refund Processing
-
-```bash
-agentcore invoke '{"prompt": "I want to return my Kindle Paperwhite (ORD-002). Please initiate a refund.", "customer_id": "CUST-123", "session_id": "t2"}'
-# Expected: refund ID, APPROVED status, 3-5 business days message
-```
-
-### Test 3 — Knowledge Base (RAG)
-
-```bash
-agentcore invoke '{"prompt": "What are the benefits of the Platinum loyalty tier?", "customer_id": "CUST-123", "session_id": "t3"}'
-# Expected: free same-day shipping, 15% discount, priority support
-```
-
-### Test 4 — Memory (Long-Term)
-
-```bash
-# Session A — introduce yourself
-agentcore invoke '{"prompt": "Hi, I am Jane. I prefer concise responses.", "customer_id": "CUST-123", "session_id": "s-A"}'
-
-# Wait at least 30 seconds for memory extraction.
-
-# Session B (new session) — verify recall
-agentcore invoke '{"prompt": "Do you remember my name and communication preference?", "customer_id": "CUST-123", "session_id": "s-B"}'
-# Expected: agent recalls "Jane" and "concise responses"
-```
-
-### Test 5 — Loyalty Discount Calculation
-
-```bash
-agentcore invoke '{"prompt": "I am a Gold member with 4250 points. Calculate my discount on a $150 standard order.", "customer_id": "CUST-123", "session_id": "t5"}'
-# Expected: points redeemed, tier discount 10%, final total, remaining points
-```
-
-### Test 6 — Browser Tool
-
-```bash
-agentcore invoke '{"prompt": "Go to https://www.udacity.com and tell me the page title.", "customer_id": "CUST-123", "session_id": "t6"}'
-# Expected: page title retrieved from live Udacity.com
-```
-
----
-
-## Submission Checklist
-
-- [x] `main.py` with all TODOs completed
-- [x] Screenshots or terminal output for all 6 test scenarios
-- [x] Brief written reflection (200–400 words) covering:
-  - One design decision you made and why
-  - One challenge you encountered and how you solved it
-  - How you would extend this agent for a production environment
-
----
-
-## Helpful References
-
-- [Amazon Bedrock AgentCore Documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html)
-- [Strands Agents Documentation](https://strandsagents.com)
-- [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
-- [uv Package Manager](https://docs.astral.sh/uv/)
-
-
-## Running this implementation
-
-Use Python 3.13 and the Python `bedrock-agentcore-starter-toolkit` installed in
-`starter/.venv`. The named AWS profile is `udacity`, the region is `us-east-1`,
-and this deployment belongs to account `327887916689`. Temporary lab credentials
-must be renewed when they expire. Credentials are not stored in this repository.
+Use Python **3.13**, [uv](https://docs.astral.sh/uv/), AWS CLI v2, and a valid AWS lab session with access to the required services and Nova 2 Lite. This project uses the **Python Bedrock AgentCore Starter Toolkit CLI** installed by its dependencies. The npm AgentCore CLI has a different project format; the commands below use the Python virtual environment explicitly.
 
 From the repository root:
 
 ```bash
-# Local tests use mocks and do not contact AWS.
-starter/.venv/bin/python -m unittest discover -s tests -v
-
-# Live integration checks and the course submission scenarios.
-starter/.venv/bin/python verify_setup.py
-starter/.venv/bin/python run_submission_tests.py
+cd starter
+uv sync --python 3.13 --locked
+cd ..
 ```
 
-The scenario runner saves timestamped terminal output in `evidence/`, uses a
-separate runtime session for each invocation, and waits 90 seconds between the
-two long-term memory sessions. Review the response itself: a CLI exit code of
-zero alone does not establish that an agent tool succeeded.
+Configure temporary credentials in the local AWS profile named `udacity`, including the session token. Keep credentials outside the repository. Validate the session before running cloud commands:
 
-`resources.json` records the existing lab resources. `provision.py` resumes
-infrastructure setup in the verified account. The Gateway target names use
-hyphens because AWS rejects underscores. The catalog uses a managed Knowledge
-Base with an S3 managed connector. The supplied Lambda handlers are unchanged.
-`starter/setup_permissions.py --profile udacity` updates the runtime integration
-policy, including memory event listing and the Code Interpreter permissions.
+```bash
+aws sts get-caller-identity --profile udacity --region us-east-1
+export AWS_PROFILE=udacity
+export AWS_REGION=us-east-1
+```
 
-For a code change, deploy from `starter/` using the existing configuration:
+The current lab resources belong to account `327887916689` in `us-east-1`. [resources.json](resources.json) records their identifiers, and [main.py](starter/main.py) contains `GATEWAY_URL`, `KB_ID`, `MEMORY_ID`, and `REGION`. Provisioning is guarded against use in a different account. A different lab account requires updating the resource configuration and reviewing that guard before provisioning.
+
+## Validate the project
+
+Run these commands from the repository root.
+
+### Local regression tests
+
+```bash
+starter/.venv/bin/python -m unittest discover -s tests -v
+```
+
+The tests cover discount rules and rounding, invalid inputs, sandbox fallback, incomplete sandbox output, grounding displayed and saved totals in the calculator result, memory namespace compatibility, memory persistence, and knowledge-base responses. AWS interactions are mocked in these tests.
+
+### Live setup and submission tests
+
+These commands call AWS and require an active lab session. Cloud resources and invocations may incur charges.
+
+```bash
+starter/.venv/bin/python verify_setup.py
+starter/.venv/bin/python run_submission_tests.py
+starter/.venv/bin/python capture_tool_traces.py
+```
+
+`run_submission_tests.py` records timestamped `agentcore invoke` terminal output. It runs both memory sessions with the same customer ID and separate application/runtime sessions, waiting 90 seconds between them for asynchronous memory extraction. Extraction latency varies; the recorded successful run required about 64 seconds, so an earlier 45-second attempt was too soon.
+
+`capture_tool_traces.py` invokes the same runtime through the AWS SDK with `include_tool_trace=true`. The Starter Toolkit CLI displays only the response text and omits sibling trace fields, so these JSON files supplement the CLI transcripts with complete tool inputs and results. Its default scenarios are order, refund, RAG, discount, and browser.
+
+To rerun one scenario:
+
+```bash
+starter/.venv/bin/python run_submission_tests.py --only 05-discount
+starter/.venv/bin/python capture_tool_traces.py --only 05-discount
+```
+
+Available scenario names are `01-order`, `02-refund`, `03-rag`, `04a-memory`, `04b-memory`, `05-discount`, and `06-browser`. Inspect response content as well as exit status: a successful CLI command alone does not prove that every tool succeeded.
+
+### Manual invocation
+
+From `starter/`, with the AWS profile and region exported as above:
+
+```bash
+.venv/bin/agentcore invoke '{"prompt":"Where is my order ORD-001?","customer_id":"CUST-123","session_id":"manual-order-001"}'
+```
+
+## Recorded results
+
+These are saved results from October 3, 2026, rather than a guarantee that a temporary lab environment remains available.
+
+| Test | Observed result | Submission evidence |
+| --- | --- | --- |
+| 1 — Order tracking | `ORD-001` shipped via UPS, tracking `TRK987654321`; API-backed tool returned order details. | [CLI output](submission/evidence/01-order-20261003T163816Z.txt), [tool trace](submission/evidence/01-order-tool-trace.json) |
+| 2 — Refund | Refund approved for `$139.99`, with a 3–5 business-day estimate; Lambda-backed tool returned a refund record. | [CLI output](submission/evidence/02-refund-20261003T163826Z.txt), [tool trace](submission/evidence/02-refund-tool-trace.json) |
+| 3 — RAG | Retrieved Platinum benefits: free same-day shipping, 15% discount, and priority support. | [CLI output](submission/evidence/03-rag-20261003T163837Z.txt), [tool trace](submission/evidence/03-rag-tool-trace.json) |
+| 4 — Memory | Recalled Jane and her preference for concise responses across separate sessions for `CUST-123`. | [Session A](submission/evidence/04a-memory-20261003T162808Z.txt), [Session B](submission/evidence/04b-memory-20261003T163141Z.txt) |
+| 5 — Discount | Redeemed 4,000 points, applied a 10% tier discount, and returned a final total of `$99.00`. | [CLI output](submission/evidence/05-discount-20261003T172300Z.txt), [tool trace](submission/evidence/05-discount-tool-trace.json) |
+| 6 — Browser | Navigated to Udacity and retrieved the live page title: “Learn the Latest Tech Skills; Advance Your Career \| Udacity”. | [CLI output](submission/evidence/06-browser-20261003T164033Z.txt), [tool trace](submission/evidence/06-browser-tool-trace.json) |
+
+The browser trace retains three invalid session-name attempts before successful recovery, navigation, HTML retrieval, and title evaluation. CLI and SDK traces are separate live conversations, so generated refund IDs can differ. Earlier failed attempts remain in the root `evidence/` directory; the submission includes the selected successful results and transparent trace history.
+
+The [local test log](submission/evidence/local-tests.txt) records eight passing tests. Its intentional sandbox-unavailable traceback exercises the fallback path.
+
+## Loyalty calculation behavior
+
+Points redeem at 100 points per dollar, in blocks of 500, capped at 50% of the original purchase total. Tier discounts apply after points redemption: Silver 0%, Gold 10%, and Platinum 15%. Earn rates are 1 point per final dollar for standard purchases, 2 for devices, and 5 for fresh purchases.
+
+For 4,250 points, Gold membership, and a `$150.00` standard purchase:
+
+| Output | Value |
+| --- | --- |
+| `points_redeemed` | `4000` (`$40.00`) |
+| `tier_discount_pct` | `10` (`$11.00` after redemption) |
+| `final_total` | `99.00` |
+| `remaining_points` | `250` before new earnings |
+| New points earned | `99` |
+| Balance including earnings | `349` |
+
+The tool validates the sandbox result and returns structured JSON. If the interpreter is unavailable or returns incomplete data, a labeled fallback calculates only the tier discount and does not claim points redemption or new earnings.
+
+The displayed response and saved memory are rendered directly from the calculator result. This fixes an observed case where the model stated `$95.00` despite the sandbox correctly returning `$99.00`.
+
+## Provisioning and deployment
+
+The existing resource inventory supports resuming lab setup:
+
+```bash
+# Repository root; review resources.json and the account guard first.
+starter/.venv/bin/python provision.py
+```
+
+For an existing configured deployment, run from `starter/`:
 
 ```bash
 PATH="$PWD/../.tools/bin:$PATH" UV_CACHE_DIR="$PWD/../.uv-cache" \
@@ -386,23 +244,46 @@ AWS_PROFILE=udacity AWS_REGION=us-east-1 AGENTCORE_SUPPRESS_RECOMMENDATION=1 \
 .venv/bin/agentcore deploy
 ```
 
-`reflection.txt` is a reflection draft to review before submission. Submission
-evidence must come from successful live runs; expired-credential attempts are
-retained in the working evidence directory for diagnosis.
+The PATH prefix supports this workspace's local `uv` installation; a normal `uv` installation on PATH also works.
 
-### Lab lifecycle
+If local `.bedrock_agentcore.yaml` configuration is missing, configure the runtime first from `starter/`:
 
-The deployed AWS resources remain available for review. After review, remove the
-runtime, Gateway targets and Gateway, Memory, managed Knowledge Base and data
-source, REST API, two Lambda functions, project S3 objects, and dedicated roles
-recorded in `resources.json`. Remove associated project logs if no longer needed.
-The deployment bucket may be shared by other AgentCore projects: delete only
-this project's objects, and delete the bucket only after verifying it is empty
-and unused. Do not assume that expired credentials have deleted AWS resources.
+```bash
+PATH="$PWD/../.tools/bin:$PATH" \
+AWS_PROFILE=udacity AWS_REGION=us-east-1 \
+.venv/bin/agentcore configure \
+  --entrypoint main.py \
+  --name customer_support_agent \
+  --deployment-type direct_code_deploy \
+  --runtime PYTHON_3_13 \
+  --disable-memory \
+  --region us-east-1 \
+  --idle-timeout 60 \
+  --max-lifetime 1800 \
+  --non-interactive
+```
 
-## Verified submission
+`--disable-memory` disables Toolkit-created memory; the agent still uses the explicitly configured project memory resource. After deploying, attach the runtime integration permissions:
 
-All six live scenarios passed on 2026-10-03. `submission.zip` contains the
-completed code, reflection draft, and seven successful terminal transcripts
-(including both memory sessions). See `submission/EVIDENCE.txt` for the results
-and the initial memory extraction delay. Six local unit tests also pass.
+```bash
+.venv/bin/python setup_permissions.py --profile udacity
+```
+
+Rerun live validation after code or infrastructure changes. Runtime logging and X-Ray tracing were enabled for the recorded deployment.
+
+## Submission and production considerations
+
+[submission.zip](submission.zip) contains the completed `main.py`, dependency files, seven CLI transcripts, five full tool traces, setup and local test evidence, the rubric assessment, and the 311-word reflection. Review the reflection before submitting it as your own account of the work.
+
+Required criteria are mapped in [rubric-assessment.txt](rubric-assessment.txt). Pydantic response models, long-conversation summarization, and a different business domain are optional enhancements and are not claimed by this implementation.
+
+This is a lab configuration. For production, authenticate the MCP Gateway, derive customer identity from a trusted login instead of caller-supplied `customer_id`, and enforce authorization before accessing orders or issuing refunds. Replace the demo refund implementation with durable, idempotent processing. Restrict and redact debug tool traces, set memory retention policies, and monitor latency, failures, and service costs.
+
+After grading, remove unneeded project resources using [resources.json](resources.json) as the inventory: runtime, Gateway targets and Gateway, memory, knowledge base and data source, API, Lambda functions, project S3 objects, and dedicated roles/log groups. Shared deployment buckets may contain other artifacts; remove only this project's objects unless the bucket is confirmed dedicated and empty. Expired credentials do not delete deployed resources.
+
+## References
+
+- [Amazon Bedrock AgentCore documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html)
+- [AgentCore Starter Toolkit](https://github.com/aws/bedrock-agentcore-starter-toolkit)
+- [Strands Agents documentation](https://strandsagents.com/latest/)
+- [Amazon Bedrock Knowledge Bases](https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html)

@@ -1,29 +1,36 @@
-Submission evidence — verified 2026-10-03 UTC
+Submission evidence — rubric review completed 2026-10-03 UTC
 
-Test 1 PASS: ORD-001 SHIPPED, UPS TRK987654321.
-Test 2 PASS: Kindle ORD-002 refund approved, REF-79VULOUP, $139.99, 3–5 business days.
-Test 3 PASS: Platinum free same-day shipping, 15% discount, priority support.
-Test 4 PASS: Session A introduced Jane and concise responses. A separate application
-session s-B-de715470 and separate runtime session recalled both. Initial recall
-at 45 seconds failed; AWS extraction completed about 64 seconds after event
-creation. The successful retry is included. The runner now waits 90 seconds;
-extraction is asynchronous and can take longer. Original failed attempts remain
-in the repository evidence directory, outside this submission package.
-Test 5 PASS: 4,000 points redeemed for $40; Gold 10% tier discount $11; total $99;
-250 points left after redemption; 99 earned; resulting balance 349.
-Test 6 PASS: Live Udacity page title: Learn the Latest Tech Skills; Advance Your Career | Udacity.
+All six scenarios passed. Seven CLI transcripts include both memory sessions.
+Five full JSON runtime responses supplement the CLI output, which hides tool
+traces. gateway-targets.json proves the API/Lambda target configuration.
 
-Seven unmodified terminal transcripts cover six scenarios (two memory sessions).
-Each includes the prompt, UTC timestamp, runtime session, request ID and response.
-local-tests.txt records six passing mocked unit tests; its intentional sandbox
-failure traceback verifies the labeled fallback, not a live service failure.
-setup-verification.json records live Gateway/catalog/memory setup checks.
+1. Order: ORD-001 SHIPPED, UPS TRK987654321.
+2. Refund: APPROVED, $139.99, 3–5 business days. Refund IDs differ across the
+   separate CLI and SDK conversations; each original transcript is preserved.
+3. RAG: Platinum same-day shipping, 15% discount, priority support.
+4. Memory: Jane and concise responses recalled with CUST-123 across separate
+   application/runtime sessions. Initial 45-second recall was too early; actual
+   extraction took about 64 seconds. Successful original sessions are included.
+5. Discount: 4000 points redeemed, tier_discount_pct=10, final_total=99.00,
+   remaining_points=250. The full trace confirms agentcore_code_interpreter.
+   Displayed and saved amounts now come directly from that structured result.
+   The final corrected CLI and SDK conversations are included.
+6. Browser: actual Udacity navigation, HTML retrieval and document.title result:
+   Learn the Latest Tech Skills; Advance Your Career | Udacity.
+   The complete browser trace retains three invalid session-name attempts before
+   successful recovery, navigation, title evaluation and browser closure.
 
-Evidence files:
-01-order: evidence/01-order-20261003T162708Z.txt
-02-refund: evidence/02-refund-20261003T162745Z.txt
-03-rag: evidence/03-rag-20261003T162758Z.txt
-04a-memory: evidence/04a-memory-20261003T162808Z.txt
-04b-memory: evidence/04b-memory-20261003T163141Z.txt
-05-discount: evidence/05-discount-20261003T162917Z.txt
-06-browser: evidence/06-browser-20261003T163023Z.txt
+Eight local tests pass. The intentional sandbox-unavailable traceback in
+local-tests.txt verifies the labeled fallback; it is not a live service failure.
+Earlier failed credential attempts and the pre-fix model arithmetic mismatch
+remain in the repository evidence directory for diagnosis, outside this ZIP.
+See rubric-assessment.txt for the criterion-by-criterion code/evidence mapping.
+
+CLI transcript files:
+01-order-20261003T163816Z.txt
+02-refund-20261003T163826Z.txt
+03-rag-20261003T163837Z.txt
+04a-memory-20261003T162808Z.txt
+04b-memory-20261003T163141Z.txt
+05-discount-20261003T172300Z.txt
+06-browser-20261003T164033Z.txt
