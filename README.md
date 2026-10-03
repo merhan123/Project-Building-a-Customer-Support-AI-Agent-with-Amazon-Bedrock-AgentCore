@@ -331,9 +331,9 @@ agentcore invoke '{"prompt": "Go to https://www.udacity.com and tell me the page
 
 ## Submission Checklist
 
-- [ ] `main.py` with all TODOs completed
-- [ ] Screenshots or terminal output for all 6 test scenarios
-- [ ] Brief written reflection (200–400 words) covering:
+- [x] `main.py` with all TODOs completed
+- [x] Screenshots or terminal output for all 6 test scenarios
+- [x] Brief written reflection (200–400 words) covering:
   - One design decision you made and why
   - One challenge you encountered and how you solved it
   - How you would extend this agent for a production environment
@@ -346,3 +346,63 @@ agentcore invoke '{"prompt": "Go to https://www.udacity.com and tell me the page
 - [Strands Agents Documentation](https://strandsagents.com)
 - [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
 - [uv Package Manager](https://docs.astral.sh/uv/)
+
+
+## Running this implementation
+
+Use Python 3.13 and the Python `bedrock-agentcore-starter-toolkit` installed in
+`starter/.venv`. The named AWS profile is `udacity`, the region is `us-east-1`,
+and this deployment belongs to account `327887916689`. Temporary lab credentials
+must be renewed when they expire. Credentials are not stored in this repository.
+
+From the repository root:
+
+```bash
+# Local tests use mocks and do not contact AWS.
+starter/.venv/bin/python -m unittest discover -s tests -v
+
+# Live integration checks and the course submission scenarios.
+starter/.venv/bin/python verify_setup.py
+starter/.venv/bin/python run_submission_tests.py
+```
+
+The scenario runner saves timestamped terminal output in `evidence/`, uses a
+separate runtime session for each invocation, and waits 90 seconds between the
+two long-term memory sessions. Review the response itself: a CLI exit code of
+zero alone does not establish that an agent tool succeeded.
+
+`resources.json` records the existing lab resources. `provision.py` resumes
+infrastructure setup in the verified account. The Gateway target names use
+hyphens because AWS rejects underscores. The catalog uses a managed Knowledge
+Base with an S3 managed connector. The supplied Lambda handlers are unchanged.
+`starter/setup_permissions.py --profile udacity` updates the runtime integration
+policy, including memory event listing and the Code Interpreter permissions.
+
+For a code change, deploy from `starter/` using the existing configuration:
+
+```bash
+PATH="$PWD/../.tools/bin:$PATH" UV_CACHE_DIR="$PWD/../.uv-cache" \
+AWS_PROFILE=udacity AWS_REGION=us-east-1 AGENTCORE_SUPPRESS_RECOMMENDATION=1 \
+.venv/bin/agentcore deploy
+```
+
+`reflection.txt` is a reflection draft to review before submission. Submission
+evidence must come from successful live runs; expired-credential attempts are
+retained in the working evidence directory for diagnosis.
+
+### Lab lifecycle
+
+The deployed AWS resources remain available for review. After review, remove the
+runtime, Gateway targets and Gateway, Memory, managed Knowledge Base and data
+source, REST API, two Lambda functions, project S3 objects, and dedicated roles
+recorded in `resources.json`. Remove associated project logs if no longer needed.
+The deployment bucket may be shared by other AgentCore projects: delete only
+this project's objects, and delete the bucket only after verifying it is empty
+and unused. Do not assume that expired credentials have deleted AWS resources.
+
+## Verified submission
+
+All six live scenarios passed on 2026-10-03. `submission.zip` contains the
+completed code, reflection draft, and seven successful terminal transcripts
+(including both memory sessions). See `submission/EVIDENCE.txt` for the results
+and the initial memory extraction delay. Six local unit tests also pass.

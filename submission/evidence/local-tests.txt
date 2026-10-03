@@ -1,0 +1,25 @@
+test_caps_rounding_and_earning (test_agent.AgentTests.test_caps_rounding_and_earning) ... ok
+test_course_discount (test_agent.AgentTests.test_course_discount) ... ok
+test_invalid_inputs_and_labeled_fallback (test_agent.AgentTests.test_invalid_inputs_and_labeled_fallback) ... ERROR:CSAI_Agent:Code interpreter failed; returning a labeled tier-only estimate
+Traceback (most recent call last):
+  File "/Users/merhanadel/Desktop/Udacity/Project-Building-a-Customer-Support-AI-Agent-with-Amazon-Bedrock-AgentCore/starter/main.py", line 185, in calculate_loyalty_discount
+    with code_session(REGION) as interpreter:
+         ~~~~~~~~~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.11/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.11/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.11/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+RuntimeError: sandbox unavailable
+ok
+test_memory_does_not_save_injected_context_or_tool_results (test_agent.AgentTests.test_memory_does_not_save_injected_context_or_tool_results) ... ok
+test_namespace_compatibility (test_agent.AgentTests.test_namespace_compatibility) ... ok
+test_rag_empty_and_grounded_chunks (test_agent.AgentTests.test_rag_empty_and_grounded_chunks) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.006s
+
+OK

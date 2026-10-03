@@ -1,0 +1,25 @@
+UTC: 20261003T162904Z
+Runtime session: a8bd95eb-6309-4189-99df-049074f4efdb
+Command: agentcore invoke '{"prompt": "Do you remember my name and communication preference?", "customer_id": "CUST-123", "session_id": "s-B"}' --session-id a8bd95eb-6309-4189-99df-049074f4efdb
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: a8bd95eb-6309-4189-99df-049074f4efdb                                                                                                                │
+│ Request ID: f6e76ce2-c6f5-42f7-8fa5-aaa6da1c5ccf                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+I don't have memory of previous interactions or personal details such as your name or communication preferences. Each conversation starts fresh, and I don't 
+retain information between sessions for privacy reasons.
+
+However, I can assist you with any questions or requests you have now. If you share your name or preferences again in this conversation, I'll do my best to 
+accommodate them for this interaction. 
+
+How can I help you today?
+
+STDERR:

@@ -1,0 +1,10 @@
+.tools/
+.uv-cache/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.DS_Store
+.bedrock_agentcore/
+.bedrock_agentcore.yaml

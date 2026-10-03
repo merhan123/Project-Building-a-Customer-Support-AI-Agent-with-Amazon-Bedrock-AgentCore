@@ -1,0 +1,29 @@
+Submission evidence — verified 2026-10-03 UTC
+
+Test 1 PASS: ORD-001 SHIPPED, UPS TRK987654321.
+Test 2 PASS: Kindle ORD-002 refund approved, REF-79VULOUP, $139.99, 3–5 business days.
+Test 3 PASS: Platinum free same-day shipping, 15% discount, priority support.
+Test 4 PASS: Session A introduced Jane and concise responses. A separate application
+session s-B-de715470 and separate runtime session recalled both. Initial recall
+at 45 seconds failed; AWS extraction completed about 64 seconds after event
+creation. The successful retry is included. The runner now waits 90 seconds;
+extraction is asynchronous and can take longer. Original failed attempts remain
+in the repository evidence directory, outside this submission package.
+Test 5 PASS: 4,000 points redeemed for $40; Gold 10% tier discount $11; total $99;
+250 points left after redemption; 99 earned; resulting balance 349.
+Test 6 PASS: Live Udacity page title: Learn the Latest Tech Skills; Advance Your Career | Udacity.
+
+Seven unmodified terminal transcripts cover six scenarios (two memory sessions).
+Each includes the prompt, UTC timestamp, runtime session, request ID and response.
+local-tests.txt records six passing mocked unit tests; its intentional sandbox
+failure traceback verifies the labeled fallback, not a live service failure.
+setup-verification.json records live Gateway/catalog/memory setup checks.
+
+Evidence files:
+01-order: evidence/01-order-20261003T162708Z.txt
+02-refund: evidence/02-refund-20261003T162745Z.txt
+03-rag: evidence/03-rag-20261003T162758Z.txt
+04a-memory: evidence/04a-memory-20261003T162808Z.txt
+04b-memory: evidence/04b-memory-20261003T163141Z.txt
+05-discount: evidence/05-discount-20261003T162917Z.txt
+06-browser: evidence/06-browser-20261003T163023Z.txt

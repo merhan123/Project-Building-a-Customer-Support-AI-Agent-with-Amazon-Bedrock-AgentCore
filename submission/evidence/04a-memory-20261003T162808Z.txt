@@ -1,0 +1,19 @@
+UTC: 20261003T162808Z
+Runtime session: 37ed0c15-6e87-4241-af3a-09ea20a145f9
+Command: agentcore invoke '{"prompt": "Hi, I am Jane. I prefer concise responses.", "customer_id": "CUST-123", "session_id": "s-A"}' --session-id 37ed0c15-6e87-4241-af3a-09ea20a145f9
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: 37ed0c15-6e87-4241-af3a-09ea20a145f9                                                                                                                │
+│ Request ID: 5b5a72ae-97e9-4841-9149-f84815c31549                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+Hello Jane. I'll keep my responses concise. How can I assist you today?
+
+STDERR:

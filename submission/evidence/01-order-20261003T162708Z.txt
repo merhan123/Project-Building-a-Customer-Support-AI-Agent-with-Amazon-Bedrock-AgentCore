@@ -1,0 +1,28 @@
+UTC: 20261003T162708Z
+Runtime session: 3bb2f829-cb7b-4b57-9c85-f20c7a18b290
+Command: agentcore invoke '{"prompt": "Can you track order ORD-001?", "customer_id": "CUST-123", "session_id": "t1"}' --session-id 3bb2f829-cb7b-4b57-9c85-f20c7a18b290
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: 3bb2f829-cb7b-4b57-9c85-f20c7a18b290                                                                                                                │
+│ Request ID: a95e68a6-cfaa-4ad1-a0ae-c4464645f4aa                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+Your order **ORD-001** is currently **SHIPPED**.
+
+**Order Details:**
+- **Items:** Wireless Headphones Pro (1 x $89.99)
+- **Total:** $89.99
+- **Carrier:** UPS
+- **Tracking Number:** TRK987654321
+- **Estimated Delivery:** October 5, 2026
+
+You can track the shipment progress using the tracking number TRK987654321 with UPS.
+
+STDERR:

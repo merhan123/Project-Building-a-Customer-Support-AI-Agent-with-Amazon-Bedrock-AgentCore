@@ -81,8 +81,18 @@ def build_policy(partition, account, settings):
                     "bedrock-agentcore:GetMemory",
                     "bedrock-agentcore:RetrieveMemoryRecords",
                     "bedrock-agentcore:CreateEvent",
+                    "bedrock-agentcore:ListEvents",
                 ],
                 "Resource": [memory, memory + "/*"],
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "bedrock-agentcore:StartCodeInterpreterSession",
+                    "bedrock-agentcore:InvokeCodeInterpreter",
+                    "bedrock-agentcore:StopCodeInterpreterSession",
+                ],
+                "Resource": f"arn:{partition}:bedrock-agentcore:{region}:aws:code-interpreter/aws.codeinterpreter.v1",
             },
             {
                 "Effect": "Allow",

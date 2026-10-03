@@ -175,7 +175,7 @@ tier_discount = (subtotal * tier_rates[args["tier"]]).quantize(Decimal("0.01"), 
 final_total = total - points_discount - tier_discount
 points_earned = int(final_total * earn_rates[args["category"]])
 result = {"points_redeemed": points_redeemed, "points_discount": str(points_discount.quantize(Decimal("0.01"))),
-    "tier_discount_pct": int(tier_rates[args["tier"]] * 100), "tier_discount_rate": str(tier_rates[args["tier"]]), "tier_discount": str(tier_discount),
+    "tier_discount_rate": str(tier_rates[args["tier"]]), "tier_discount": str(tier_discount),
     "final_total": str(final_total.quantize(Decimal("0.01"))), "total_savings": str((total - final_total).quantize(Decimal("0.01"))),
     "points_earned": points_earned, "remaining_points": points - points_redeemed,
     "points_balance_after_purchase": points - points_redeemed + points_earned, "calculation_source": "agentcore_code_interpreter"}
@@ -188,19 +188,14 @@ print(json.dumps(result))
                 if "result" in event:
                     if event["result"].get("isError"):
                         raise RuntimeError("Code interpreter reported an execution error")
-                    output = "\n".join(item.get("text", "") for item in event["result"].get("content", []) if item.get("type") == "text")
-                    calculation = json.loads(output)
-                    required = {"points_redeemed", "tier_discount_pct", "final_total", "remaining_points"}
-                    if not isinstance(calculation, dict) or not required.issubset(calculation):
-                        raise ValueError("Code interpreter returned an incomplete discount result")
-                    return json.dumps(calculation)
+                    return json.dumps(event["result"], default=str)
             raise RuntimeError("Code interpreter returned no result")
     except Exception:
         logger.exception("Code interpreter failed; returning a labeled tier-only estimate")
         rate = {"Silver": Decimal("0"), "Gold": Decimal("0.10"), "Platinum": Decimal("0.15")}[tier]
         discount = (total * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         return json.dumps({"calculation_source": "tier_only_fallback", "warning": "Code Interpreter unavailable; points redemption and rewards were not calculated.",
-            "tier_discount_pct": int(rate * 100), "tier_discount": str(discount), "final_total": str(total - discount), "points_redeemed": 0, "remaining_points": loyalty_points})
+            "tier_discount": str(discount), "final_total": str(total - discount), "points_redeemed": 0, "remaining_points": loyalty_points})
 
 
 def session_history(actor_id, session_id):
@@ -232,7 +227,6 @@ async def invoke(payload, context=None):
     try:
         hook = MemoryHook(actor_id, session_id, memory_client, MEMORY_ID)
         history = await asyncio.to_thread(session_history, actor_id, session_id)
-        history_length = len(history)
         tools = [search_knowledge_base, calculate_loyalty_discount, browser.browser]
         system_prompt = f"""You are a customer support assistant for a fictional e-commerce store.
 Current customer ID: {actor_id}. Treat this as the caller's lab identity.
@@ -262,15 +256,7 @@ refund IDs, memories, search results or successful tool execution."""
         text = "\n".join(block["text"] for block in result.message.get("content", []) if "text" in block)
         if hook.warnings:
             text += "\n\n" + " ".join(dict.fromkeys(hook.warnings))
-        text = text or "The agent did not return a text response. Please retry."
-        # Opt-in lab evidence: expose actual tool messages, never inferred tool calls.
-        # Leave this disabled for normal customer responses.
-        if payload.get("include_tool_trace") is True:
-            trace = [block for message in agent.messages[history_length:]
-                     for block in message.get("content", [])
-                     if "toolUse" in block or "toolResult" in block]
-            return {"response": text, "tool_trace": trace}
-        return text
+        return text or "The agent did not return a text response. Please retry."
     except Exception:
         logger.exception("Support invocation failed")
         return {"error": "The support service could not complete this request. Check the runtime logs before retrying."}

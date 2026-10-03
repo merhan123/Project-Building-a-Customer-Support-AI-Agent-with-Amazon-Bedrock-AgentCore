@@ -1,0 +1,17 @@
+UTC: 20261003T122303Z
+Runtime session: 7dd499fd-c0ef-4325-abbc-74cd111fc0ed
+Command: agentcore invoke '{"prompt": "Can you track order ORD-001?", "customer_id": "CUST-123", "session_id": "t1"}' --session-id 7dd499fd-c0ef-4325-abbc-74cd111fc0ed
+Exit code: 1
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Invocation failed: An error occurred (AccessDeniedException) when calling the InvokeAgentRuntime operation: The security token included in the request is 
+expired
+Your AWS credentials or bearer token may be expired. Please re-login to get a new auth token.
+
+STDERR:

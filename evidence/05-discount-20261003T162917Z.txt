@@ -1,0 +1,36 @@
+UTC: 20261003T162917Z
+Runtime session: 7453c57b-d768-48ae-8515-5cfc08ef652a
+Command: agentcore invoke '{"prompt": "I am a Gold member with 4250 points. Calculate my discount on a $150 standard order.", "customer_id": "CUST-123", "session_id": "t5"}' --session-id 7453c57b-d768-48ae-8515-5cfc08ef652a
+Exit code: 0
+
+STDOUT:
+╭─────────────────────────────────────────────────────────────────── customer_support_agent ───────────────────────────────────────────────────────────────────╮
+│ Session: 7453c57b-d768-48ae-8515-5cfc08ef652a                                                                                                                │
+│ Request ID: eaf95bcb-2a8f-4782-996f-1a6b6d762360                                                                                                             │
+│ ARN: arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/customer_support_agent-nfZr4M2cmM                                                              │
+│ Logs: aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --follow   │
+│       aws logs tail /aws/bedrock-agentcore/runtimes/customer_support_agent-nfZr4M2cmM-DEFAULT --log-stream-name-prefix "2026/10/03/[runtime-logs" --since 1h │
+│ GenAI Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#gen-ai-observability/agent-core                                             │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Response:
+### Loyalty Discount Calculation for Your $150 Standard Order (Gold Tier)
+
+Here's the detailed breakdown of your discount:
+
+**Points Redeemed:** 4,000 points  
+**Points Discount:** $40.00  
+
+**Gold Tier Discount Rate:** 10%  
+**Tier Discount:** $11.00  
+
+**Final Total After Discounts:** $99.00  
+**Total Savings:** $51.00  
+
+**Loyalty Points Earned from Purchase:** 99 points  
+**Remaining Points After Redemption:** 250 points  
+**Your New Points Balance After Purchase:** 349 points  
+
+As a Gold member, you received both a points-based discount and an automatic tier discount, saving you a total of $51 on your $150 order!
+
+STDERR:
