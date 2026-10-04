@@ -9,6 +9,7 @@ from bedrock_agentcore.memory import MemoryClient
 from strands.models import BedrockModel
 from strands.tools.mcp.mcp_client import MCPClient
 from mcp.client.streamable_http import streamable_http_client
+from contextlib import ExitStack
 import argparse, json
 import os, asyncio, boto3
 from strands.hooks import (
@@ -24,10 +25,11 @@ import re
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("CSAI_Agent")
+logger.setLevel(logging.INFO)
 app = BedrockAgentCoreApp()
 os.environ["BYPASS_TOOL_CONSENT"] = "true"
 
-GATEWAY_URL = "https://customersupportgateway-zkl1pyfhum.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp"
+GATEWAY_URL = os.environ.get("GATEWAY_URL", "https://customersupportgateway-zkl1pyfhum.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp")
 KB_ID = 'D0Y84S0BC1'
 REGION = "us-east-1"
 MEMORY_ID = 'CustomerSupportMemory-fJ6pYf9ecW'
@@ -284,12 +286,40 @@ Honor customer communication preferences when consistent with these rules.
 If asked to remember a fictional name or preference, acknowledge it briefly.
 Be concise and explicit about tool failures. Never invent order details,
 refund IDs, memories, search results or successful tool execution."""
-        with MCPClient(lambda: streamable_http_client(GATEWAY_URL)) as gateway:
-            page = gateway.list_tools_sync()
-            tools.extend(page)
-            while page.pagination_token:
-                page = gateway.list_tools_sync(pagination_token=page.pagination_token)
-                tools.extend(page)
+        with ExitStack() as gateway_stack:
+            try:
+                gateway = gateway_stack.enter_context(
+                    MCPClient(lambda: streamable_http_client(GATEWAY_URL)))
+                gateway_tools = []
+                page = gateway.list_tools_sync()
+                gateway_tools.extend(page)
+                while page.pagination_token:
+                    page = gateway.list_tools_sync(pagination_token=page.pagination_token)
+                    gateway_tools.extend(page)
+                if not gateway_tools:
+                    raise ValueError("No Gateway tools available")
+                tools.extend(gateway_tools)
+                logger.info("Gateway connected successfully. Loaded %d tools.", len(gateway_tools))
+            except Exception as exc:
+                # MCP may wrap transport failures; inspect causes without logging
+                # raw messages, URLs, headers, tokens, or customer data.
+                cause = exc
+                seen = set()
+                failure = "Gateway tool loading failed"
+                while cause is not None and id(cause) not in seen:
+                    seen.add(id(cause))
+                    if isinstance(cause, TimeoutError):
+                        failure = "Gateway tool loading timed out"
+                        break
+                    if isinstance(cause, ConnectionError):
+                        failure = "Gateway connection failed"
+                        break
+                    cause = cause.__cause__ or cause.__context__
+                safe_error = RuntimeError(failure)
+                logger.exception(failure, exc_info=(RuntimeError, safe_error, None))
+                return {"error": failure + ". Order and refund tools are unavailable. "
+                        "Please try again later or contact support. If you administer this service, "
+                        "verify the Gateway endpoint, availability, and access configuration before retrying."}
             agent = Agent(model=model, tools=tools, hooks=[hook], messages=history,
                           system_prompt=system_prompt, callback_handler=None)
             result = await agent.invoke_async(user_input)

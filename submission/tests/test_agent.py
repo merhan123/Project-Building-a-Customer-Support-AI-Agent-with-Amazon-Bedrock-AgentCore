@@ -13,7 +13,7 @@ from types import SimpleNamespace
 os.environ['AWS_ACCESS_KEY_ID'] = 'offline-test'
 os.environ['AWS_SECRET_ACCESS_KEY'] = 'offline-test'
 os.environ['AWS_EC2_METADATA_DISABLED'] = 'true'
-spec = importlib.util.spec_from_file_location('support_agent', Path(__file__).resolve().parents[1] / 'starter/main.py')
+spec = importlib.util.spec_from_file_location('support_agent', Path(__file__).resolve().parents[1] / 'main.py')
 agent = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(agent)
 

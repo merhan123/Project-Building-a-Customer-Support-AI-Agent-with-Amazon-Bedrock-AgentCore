@@ -1,0 +1,20 @@
+Gateway failure-handling revision — October 4, 2026
+
+Added INFO logging for successful Gateway discovery, including tool count.
+Connection setup and all discovery pages are protected. Timeout, connection,
+other discovery failures, and empty tool lists return a meaningful error with
+safe retry/support and administrator guidance. The agent does not run with a
+partially loaded Gateway tool list. Application exception logging deliberately
+uses a sanitized exception instead of raw transport messages or credentials.
+GATEWAY_URL now supports an environment override for dummy-endpoint testing.
+
+Validation: 10 offline regression tests passed. Gateway tests mock connection,
+timeout, generic failure, empty discovery, later-page failure, and paginated
+success; they check safe messages, cleanup, and application log redaction.
+These are mocked tests, not a live dummy-endpoint or revised deployment test.
+The retained October 3 cloud traces contain successful, nonempty API-backed
+order and Lambda-backed refund results. They predate this revision.
+
+Before resubmission: deploy starter/main.py using the README command and rerun
+order/refund cloud traces. Test a dummy GATEWAY_URL in an isolated test runtime
+and restore the real endpoint afterward. This revision has not been deployed.

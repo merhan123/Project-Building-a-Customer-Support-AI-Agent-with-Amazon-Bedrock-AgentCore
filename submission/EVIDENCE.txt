@@ -1,3 +1,6 @@
+October 4 revision: see REVISION.txt and evidence/local-tests-revision.txt.
+The following cloud results describe the October 3 deployment.
+
 Submission evidence — rubric review completed 2026-10-03 UTC
 
 All six scenarios passed. Seven CLI transcripts include both memory sessions.

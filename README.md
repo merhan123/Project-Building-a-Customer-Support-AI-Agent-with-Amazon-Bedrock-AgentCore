@@ -126,6 +126,16 @@ The original learning tasks are retained below as completed TODOs. Each solution
 └── submission.zip
 ```
 
+## Gateway review revision (October 4)
+
+Gateway setup and paginated discovery now log successful tool counts and return
+safe, actionable errors for failures or empty discovery. `GATEWAY_URL` accepts
+an environment override for testing. Application error logs omit raw transport
+exception text to avoid exposing endpoint credentials. Ten offline tests pass,
+including Gateway failure and success cases; see
+[revision details](submission/REVISION.txt). The revised code has not been
+redeployed; October 3 cloud evidence remains historical.
+
 ## Local setup
 
 Use Python **3.13**, [uv](https://docs.astral.sh/uv/), AWS CLI v2, and a valid AWS lab session with access to the required services and Nova 2 Lite. This project uses the **Python Bedrock AgentCore Starter Toolkit CLI** installed by its dependencies. The npm AgentCore CLI has a different project format; the commands below use the Python virtual environment explicitly.
