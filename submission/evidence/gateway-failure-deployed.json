@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-04T16:38:23.099418+00:00",
+  "test": "Real deployed artifact with unreachable loopback Gateway endpoint",
+  "source_runtime_version": "4",
+  "probe_runtime_arn": "arn:aws:bedrock-agentcore:us-east-1:327887916689:runtime/gateway_failure_probe_9ee370d6-tVoyY24o4m",
+  "request_id": "00d2b463-2ab4-488e-8533-045169432805",
+  "response": {
+    "error": "Gateway tool loading failed. Order and refund tools are unavailable. Please try again later or contact support. If you administer this service, verify the Gateway endpoint, availability, and access configuration before retrying."
+  },
+  "passed": true,
+  "cleanup": "Temporary runtime deletion confirmed"
+}

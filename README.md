@@ -133,8 +133,10 @@ safe, actionable errors for failures or empty discovery. `GATEWAY_URL` accepts
 an environment override for testing. Application error logs omit raw transport
 exception text to avoid exposing endpoint credentials. Ten offline tests pass,
 including Gateway failure and success cases; see
-[revision details](submission/REVISION.txt). The revised code has not been
-redeployed; October 3 cloud evidence remains historical.
+[revision details](submission/REVISION.txt). Runtime version 4 was deployed and verified on October 4. Fresh order/refund
+traces passed, and a temporary cloud runtime with an unreachable dummy Gateway
+returned an actionable error. Temporary runtime deletion was confirmed. Other
+capability evidence remains from October 3.
 
 ## Local setup
 
